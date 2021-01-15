@@ -21,7 +21,9 @@ export default {
       // 定时器标识
       timerId: null,
       // 页数切换时间差
-      timeout: 3000
+      timeout: 3000,
+      // 每页数据条数
+      pageItem: 5
     }
   },
   mounted () {
@@ -29,10 +31,16 @@ export default {
     this.initChart()
     // 获取服务器数据
     this.getData()
+    // 监听窗口变化触发
+    window.addEventListener('resize', this.screenAdapter)
+    // 页面加载完成 主动进行屏幕的适配
+    this.screenAdapter()
   },
   destroyed () {
     // 组件销毁时 关闭定时器
     clearInterval(this.timerId)
+    // 组件销毁时 注销响应式事件(避免内存泄漏)
+    window.removeEventListener('resize', this.screenAdapter)
   },
   methods: {
     //  初始化Echarts实例对象
@@ -40,6 +48,76 @@ export default {
       const Dom = this.$refs.seller_ref
       // 生成Echarts实例对象 保存在data中
       this.chartInstance = this.$echarts.init(Dom, 'chalk')
+      // 和图表初始化样式的配置项
+      const initOption = {
+        title: {
+          text: '▎商家销售统计',
+          left: 20,
+          top: 20
+        },
+        grid: {
+          top: '20%',
+          left: '3%',
+          right: '6%',
+          bottom: '3%',
+          containLabel: true // 距离包含坐标轴上的文字
+        },
+        xAxis: {
+          type: 'value'
+        },
+        yAxis: {
+          type: 'category'
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'line',
+            z: 0,
+            lineStyle: {
+              color: '#2D3443'
+            }
+          }
+        },
+        series: [
+          {
+            type: 'bar',
+            label: {
+              show: true,
+              position: 'right',
+              textStyle: {
+                color: 'white'
+              }
+            },
+            itemStyle: {
+              /**
+               * 改变渐变色,传入参数x1,y1,x2,y2,[{offset:0,color:'颜色'},{offset:1,color:'颜色'}]
+               * this.$echarts.graphic.LinearGradient(x1,y1,x2,y2,[{},{}])
+               * 方法一
+               * */
+              // color: new this.$echarts.graphic.LinearGradient(0, 0, 1, 0, [
+              //   { offset: 0, color: '#5052EE' },
+              //   { offset: 1, color: '#AB6EE5' }
+              // ])
+              /**
+               * 方法二
+               * */
+              color: {
+                type: 'linear', // 渐变
+                x: 0,
+                y: 0,
+                x2: 1,
+                y2: 0,
+                colorStops: [
+                  { offset: 0, color: '#5052EE' },
+                  { offset: 1, color: '#AB6EE5' }
+                ]
+              }
+            }
+          }
+        ]
+      }
+      // 渲染图标(不包含数据)
+      this.chartInstance.setOption(initOption)
       // 监听鼠标移入图表 清除定时器
       this.chartInstance.on('mouseover', () => {
         clearInterval(this.timerId)
@@ -71,9 +149,9 @@ export default {
     },
     //  更新图表
     updateChart () {
-      // 分页获取数据
-      const start = (this.currentPage - 1) * 5
-      const end = this.currentPage * 5
+      // 分页获取数据(前端分页,数据后端全部返回,通过start,end和slice()决定返回数据条数)
+      const start = (this.currentPage - 1) * this.pageItem
+      const end = this.currentPage * this.pageItem
       // slice() 截取返回一个新数组,不包括end索引值元素
       const showData = this.allData.slice(start, end)
       // 从服务器数据中 取出所有商家名称 返回到一个数组中
@@ -84,84 +162,20 @@ export default {
       const sellerValue = showData.map((item) => {
         return item.value
       })
-      const option = {
-        title: {
-          text: '▎商家销售统计',
-          textStyle: {
-            fontSize: 66
-          },
-          left: 20,
-          top: 20
-        },
-        grid: {
-          top: '20%',
-          left: '3%',
-          right: '6%',
-          bottom: '3%',
-          containLabel: true // 距离包含坐标轴上的文字
-        },
-        xAxis: {
-          type: 'value'
-        },
+      // 和数据相关的配置项
+      const dataOption = {
         yAxis: {
-          type: 'category',
           // 数据要求 :['aa','bb','cc]
           data: sellerNames
         },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'line',
-            z: 0,
-            lineStyle: {
-              width: 66,
-              color: '#2D3443'
-            }
-          }
-        },
         series: [
           {
-            type: 'bar',
-            data: sellerValue,
-            barWidth: 66,
-            label: {
-              show: true,
-              position: 'right',
-              textStyle: {
-                color: 'white'
-              }
-            },
-            itemStyle: {
-              barBorderRadius: [0, 33, 33, 0],
-              /**
-               * 改变渐变色,传入参数x1,y1,x2,y2,[{offset:0,color:'颜色'},{offset:1,color:'颜色'}]
-               * this.$echarts.graphic.LinearGradient(x1,y1,x2,y2,[{},{}])
-               * 方法一
-               * */
-              // color: new this.$echarts.graphic.LinearGradient(0, 0, 1, 0, [
-              //   { offset: 0, color: '#5052EE' },
-              //   { offset: 1, color: '#AB6EE5' }
-              // ])
-              /**
-               * 方法二
-               * */
-              color: {
-                type: 'linear', // 渐变
-                x: 0,
-                y: 0,
-                x2: 1,
-                y2: 0,
-                colorStops: [
-                  { offset: 0, color: '#5052EE' },
-                  { offset: 1, color: '#AB6EE5' }
-                ]
-              }
-            }
+            data: sellerValue
           }
         ]
       }
       // 渲染图表
-      this.chartInstance.setOption(option)
+      this.chartInstance.setOption(dataOption)
     },
     //  页数自动增加(通过定时器添加)
     startInterval () {
@@ -178,6 +192,39 @@ export default {
         }
         this.updateChart()
       }, this.timeout)
+    },
+    // 当浏览器大小发生变化会触发事件(响应事件)
+    screenAdapter () {
+      // 当前浏览器窗口宽度
+      const windowWidth = this.$refs.seller_ref.offsetWidth
+      const titleFontSize = windowWidth / 100 * 3.6
+      // 和分辨率大小相关的配置项
+      const adapterOption = {
+        title: {
+          textStyle: {
+            fontSize: titleFontSize
+          }
+        },
+        tooltip: {
+          axisPointer: {
+            lineStyle: {
+              width: titleFontSize
+            }
+          }
+        },
+        series: [
+          {
+            barWidth: titleFontSize,
+            itemStyle: {
+              barBorderRadius: [0, titleFontSize / 2, titleFontSize / 2, 0]
+            }
+          }
+        ]
+      }
+      // 渲染图表
+      this.chartInstance.setOption(adapterOption)
+      // 响应式必须调用resize()方法,不然无法产生效果
+      this.chartInstance.resize()
     }
   }
 }
