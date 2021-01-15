@@ -1,5 +1,14 @@
 <template>
   <div class="com-container">
+    <div class="title" :style="comStyle">
+      <span>{{'▎' + showTitle }}</span>
+      <span class="iconfont title-icon" @click="showChoice = !showChoice" :style="comStyle">&#xe6eb;</span>
+      <div class="select-con" v-show="showChoice" :style="marginStyle">
+        <div class="select-item" v-for="item in selectTypes" :key="item.key" @click="handleSelect(item.key)">
+          {{item.text }}
+        </div>
+      </div>
+    </div>
     <div class="com-chart" ref="trend_ref"></div>
   </div>
 </template>
@@ -12,7 +21,13 @@ export default {
       // 存储图表实例
       chartInstance: null,
       // 服务器请求响应数据
-      allData: null
+      allData: null,
+      // 是否显示可选项
+      showChoice: false,
+      // 标题名 key
+      choiceType: 'map',
+      // 标题的字体大小
+      titleFontSize: 0
     }
   },
   mounted () {
@@ -33,11 +48,27 @@ export default {
     // 初始化图表
     initChart () {
       // 初始化实例
-      this.chartInstance = this.$echarts.init(this.$refs.trend_ref)
+      this.chartInstance = this.$echarts.init(this.$refs.trend_ref, 'chalk')
       // 初始化图表设置配置项
       const initOption = {
+        grid: {
+          left: '3%',
+          right: '4%',
+          top: '35%',
+          bottom: '1%',
+          containLabel: true // 图表定位x,y轴也受影响
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        legend: { // 数据筛选样式控制
+          left: 20,
+          top: '15%',
+          icon: 'circle'
+        },
         xAxis: {
-          type: 'category'
+          type: 'category',
+          boundaryGap: false // 数据从x=0开始
         },
         yAxis: {
           type: 'value'
@@ -56,17 +87,39 @@ export default {
     },
     // 图表更新
     updateChart () {
+      // 半透明的颜色值
+      const colorArr1 = [
+        'rgba(11, 168, 44, 0.5)',
+        'rgba(44, 110, 255, 0.5)',
+        'rgba(22, 242, 217, 0.5)',
+        'rgba(254, 33, 30, 0.5)',
+        'rgba(250, 105, 0, 0.5)'
+      ]
+      // 全透明的颜色值
+      const colorArr2 = [
+        'rgba(11, 168, 44, 0)',
+        'rgba(44, 110, 255, 0)',
+        'rgba(22, 242, 217, 0)',
+        'rgba(254, 33, 30, 0)',
+        'rgba(250, 105, 0, 0)'
+      ]
       // x轴月份数据 ['一月','二月'.....]
       const timeArr = this.allData.common.month
-      // y轴地区数据 [{type: "line", data: [12,44,55,...], stack: "map"},{}....]
-      const valueArr = this.allData.map.data
+      // y轴地区数据 [{type: "line", data: [12,44,55,...], stack: "map",name: "上海",areaStyle: {} },{}....]
+      const valueArr = this.allData[this.choiceType].data
       // 处理y轴数据
-      const seriesArr = valueArr.map(item => {
+      const seriesArr = valueArr.map((item, index) => {
         return {
           name: item.name,
           type: 'line',
           data: item.data,
-          stack: 'map' // 将样式转换为堆叠图
+          stack: 'this.choiceType', // 将样式转换为堆叠图
+          areaStyle: { // 颜色填充
+            color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: colorArr1[index] },
+              { offset: 1, color: colorArr2[index] }
+            ])
+          }
         }
       })
       // 图例筛选数据 ["上海", "北京", "深圳", "广州", "重庆"] 每根折线图对应的name
@@ -88,16 +141,83 @@ export default {
     },
     // 分辨率适配
     screenAdapter () {
+      // 设置响应文字宽度
+      this.titleFontSize = this.$refs.trend_ref.offsetWidth / 100 * 3.6
       // 分辨率适配配置项
-      const adapterOption = {}
+      const adapterOption = {
+        legend: { // 图例样式
+          itemWidth: this.titleFontSize,
+          itemHeight: this.titleFontSize,
+          itemGap: this.titleFontSize,
+          textStyle: {
+            fontSize: this.titleFontSize / 2
+          }
+        }
+      }
       // 渲染图表
       this.chartInstance.setOption(adapterOption)
       this.chartInstance.resize()
+    },
+    // 标题点击事件
+    handleSelect (currentType) {
+      // 更改当前显示地图数据
+      this.choiceType = currentType
+      // 触发图表重新渲染
+      this.updateChart()
+      // 关闭标题可选项
+      this.showChoice = false
+    }
+  },
+  computed: {
+    // 地区分类数据 如果没有请求数据则为[]有数据则为[{},{},{}]
+    selectTypes () {
+      if (!this.allData) {
+        return []
+      } else {
+        // 通过filter过滤 已选项
+        return this.allData.type.filter(item => {
+          return item.key !== this.choiceType
+        })
+      }
+    },
+    // 标题内容
+    showTitle () {
+      if (!this.allData) {
+        return []
+      } else {
+        return this.allData[this.choiceType].title
+      }
+    },
+    // 设置给标题的样式
+    comStyle () {
+      return {
+        fontSize: this.titleFontSize + 'px'
+      }
+    },
+    marginStyle () {
+      return {
+        marginLeft: this.titleFontSize / 2 + 'px'
+      }
     }
   }
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+.title{
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  z-index: 10;
+  color: white;
+  .title-icon {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+  .select-con{
+    background-color: #222733;
+    border-radius: 30px;
+  }
+}
 
 </style>
