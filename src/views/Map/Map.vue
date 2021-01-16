@@ -58,6 +58,14 @@ export default {
           itemStyle: {
             areaColor: '#2E72BF',
             borderColor: '#333'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 16,
+              position: 'inside',
+              fontWeight: 'bold'
+            }
           }
         },
         legend: {
@@ -110,8 +118,24 @@ export default {
     },
     // 页面宽度变化触发事件
     screenAdapter () {
-      const adapterOption = {}
+      const titleFontSize = this.$refs.map_ref.offsetWidth / 100 * 3.6
+      const adapterOption = {
+        title: {
+          textStyle: {
+            fontSize: titleFontSize
+          }
+        },
+        legend: {
+          itemWidth: titleFontSize / 2,
+          itemHeight: titleFontSize / 2,
+          itemGap: titleFontSize / 2,
+          textStyle: {
+            fontSize: titleFontSize / 2
+          }
+        }
+      }
       this.chartInstance.setOption(adapterOption)
+      // Echarts自带方法 计算图表大小 实现响应式
       this.chartInstance.resize()
     }
   }
