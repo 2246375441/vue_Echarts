@@ -27,7 +27,23 @@ export default {
       // 标题名 key
       choiceType: 'map',
       // 标题的字体大小
-      titleFontSize: 0
+      titleFontSize: 0,
+      // 半透明的颜色值
+      colorArr1: [
+        'rgba(11, 168, 44, 0.5)',
+        'rgba(44, 110, 255, 0.5)',
+        'rgba(22, 242, 217, 0.5)',
+        'rgba(254, 33, 30, 0.5)',
+        'rgba(250, 105, 0, 0.5)'
+      ],
+      // 全透明的颜色值
+      colorArr2: [
+        'rgba(11, 168, 44, 0)',
+        'rgba(44, 110, 255, 0)',
+        'rgba(22, 242, 217, 0)',
+        'rgba(254, 33, 30, 0)',
+        'rgba(250, 105, 0, 0)'
+      ]
     }
   },
   mounted () {
@@ -88,21 +104,9 @@ export default {
     // 图表更新
     updateChart () {
       // 半透明的颜色值
-      const colorArr1 = [
-        'rgba(11, 168, 44, 0.5)',
-        'rgba(44, 110, 255, 0.5)',
-        'rgba(22, 242, 217, 0.5)',
-        'rgba(254, 33, 30, 0.5)',
-        'rgba(250, 105, 0, 0.5)'
-      ]
+      const colorArr1 = this.colorArr1
       // 全透明的颜色值
-      const colorArr2 = [
-        'rgba(11, 168, 44, 0)',
-        'rgba(44, 110, 255, 0)',
-        'rgba(22, 242, 217, 0)',
-        'rgba(254, 33, 30, 0)',
-        'rgba(250, 105, 0, 0)'
-      ]
+      const colorArr2 = this.colorArr2
       // x轴月份数据 ['一月','二月'.....]
       const timeArr = this.allData.common.month
       // y轴地区数据 [{type: "line", data: [12,44,55,...], stack: "map",name: "上海",areaStyle: {} },{}....]
