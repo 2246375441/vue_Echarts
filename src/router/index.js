@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import SellerPage from '../views/Seller/SellerPage'
 import TrendPage from '../views/Trend/TrendPage'
 import MapPage from '../views/Map/MapPage'
+import RankPage from '../views/Rank/RankPage'
 
 Vue.use(VueRouter)
 
@@ -24,6 +25,12 @@ const routes = [
     name: 'MapPage',
     path: '/MapPage',
     component: MapPage
+  },
+  {
+    // 柱状图
+    name: 'RankPage',
+    path: '/RankPage',
+    component: RankPage
   }
 ]
 
