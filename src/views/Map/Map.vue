@@ -1,11 +1,15 @@
 <template>
-  <div class="com-container">
-    <div class="com-chart" ref="map_ref"></div>
+  <div class="com-container" @dblclick="revertMap">
+    <div ref="map_ref" class="com-chart"></div>
   </div>
 </template>
 
 <script>
+// 用来进行导入根目录下的china.json文件
 import axios from 'axios'
+// 导入工具函数 传入中文参数 返回对应json数据路径
+import { getProvinceMapInfo } from '../../utils/map_utils'
+
 export default {
   name: 'Map',
   data () {
@@ -13,7 +17,9 @@ export default {
       // 图表实例
       chartInstance: null,
       // 请求地图数据
-      allData: null
+      allData: null,
+      // 获取省份地图矢量数据缓存
+      mapData: {}
     }
   },
   mounted () {
@@ -75,6 +81,32 @@ export default {
         }
       }
       this.chartInstance.setOption(initOption)
+
+      // 地图点击事件监听 (点击进入省详情地图)
+      this.chartInstance.on('click', async (arg) => {
+        // 可以通过arg.name获取 点击的是那个省
+        // 通过导入的工具函数 获取对应根目录下的json数据
+        const provinceInfo = getProvinceMapInfo(arg.name)
+        if (provinceInfo.ts) {
+          alert(provinceInfo.ts)
+        } else {
+          // 判断缓存中是否存在该地图数据,有则直接开始渲染 没有则获取发送请求
+          if (!this.mapData[provinceInfo.key]) {
+            // 请求json数据
+            const res = await axios.get('http://localhost:9000' + provinceInfo.path)
+            // 缓存请求数据
+            this.mapData[provinceInfo.key] = res.data
+            // 注册矢量地图数据
+            this.$echarts.registerMap(provinceInfo.key, res.data)
+          }
+          const changeOption = {
+            geo: {
+              map: provinceInfo.key
+            }
+          }
+          this.chartInstance.setOption(changeOption)
+        }
+      })
     },
     // 请求地图散点数据 (地图矢量图由本地提供而不是后端API,散点图由后端提供)
     async getData () {
@@ -98,9 +130,7 @@ export default {
             scale: 5, // 圆圈大小
             brushType: 'stroke' // 空心还是实心效果
           },
-          tooltip: {
-
-          },
+          tooltip: {},
           name: item.name,
           data: item.children,
           coordinateSystem: 'geo' // 散点使用地图坐标系统
@@ -137,6 +167,15 @@ export default {
       this.chartInstance.setOption(adapterOption)
       // Echarts自带方法 计算图表大小 实现响应式
       this.chartInstance.resize()
+    },
+    // 鼠标双击地图退出
+    revertMap () {
+      const revertOption = {
+        geo: {
+          map: 'china'
+        }
+      }
+      this.chartInstance.setOption(revertOption)
     }
   }
 }
