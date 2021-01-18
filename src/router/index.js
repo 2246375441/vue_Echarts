@@ -5,18 +5,19 @@ import TrendPage from '../views/Trend/TrendPage'
 import MapPage from '../views/Map/MapPage'
 import RankPage from '../views/Rank/RankPage'
 import HotPage from '../views/Hot/HotPage'
+import StockPage from '../views/Stock/StockPage'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
-    // 商家销售柱状图
+    // 柱状图
     name: 'SellerPage',
     path: '/SellerPage',
     component: SellerPage
   },
   {
-    // 商家折线图
+    // 折线图
     name: 'TrendPage',
     path: '/TrendPage',
     component: TrendPage
@@ -38,6 +39,12 @@ const routes = [
     name: 'HotPage',
     path: '/HotPage',
     component: HotPage
+  },
+  {
+    // 圆图
+    name: 'StockPage',
+    path: '/StockPage',
+    component: StockPage
   }
 ]
 
