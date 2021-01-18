@@ -2,9 +2,9 @@
 <template>
   <div class='com-container'>
     <div class='com-chart' ref='hot_ref'></div>
-    <span class="iconfont arr-left" @click="toLeft">&#xe6ef;</span>
-    <span class="iconfont arr-right" @click="toRight">&#xe6ed;</span>
-    <span class="cat-name">{{ catName }}</span>
+    <span class="iconfont arr-left" @click="toLeft" :style="comStyle">&#xe6ef;</span>
+    <span class="iconfont arr-right" @click="toRight" :style="comStyle">&#xe6ed;</span>
+    <span class="cat-name" :style="comStyle">{{ catName }}</span>
   </div>
 </template>
 
@@ -17,7 +17,9 @@ export default {
       // 请求数据
       allData: null,
       // 当前展示的一级分类数据
-      currentIndex: 0
+      currentIndex: 0,
+      // 当前分辨率下文字大小
+      titleFontSize: 0
     }
   },
   mounted () {
@@ -38,11 +40,55 @@ export default {
     // 初始化实例
     initChart () {
       // 初始化Echarts实例对象
-      this.chartInstance = this.$echarts.init(this.$refs.hot_ref)
+      this.chartInstance = this.$echarts.init(this.$refs.hot_ref, 'chalk')
       const initOption = {
+        title: {
+          text: '▎热销商品销售金额占比图',
+          top: 20,
+          left: 20
+        },
+        legend: {
+          top: '15%',
+          icon: 'circle'
+        },
+        tooltip: {
+          show: true,
+          formatter: arg => {
+            // 三级分类数据
+            const thirdCategory = arg.data.children
+            // 数据排序
+            thirdCategory.sort((a, b) => {
+              return a.value - b.value
+            })
+            // 数据总和
+            let total = 0
+            thirdCategory.forEach(item => {
+              total += item.value
+            })
+            // 高亮文字设置
+            let retStr = ''
+            thirdCategory.forEach(item => {
+              retStr = retStr + `
+              ${item.name} : ${item.value} (${parseInt(item.value / total * 100)}%) </br>
+              `
+            })
+            return retStr
+          }
+        },
         series: [
           {
-            type: 'pie'
+            type: 'pie',
+            label: {
+              show: false // 默认文字和线全部隐藏
+            },
+            emphasis: {
+              label: {
+                show: true // 高亮提示文字
+              },
+              labelLine: {
+                show: false // 高亮下隐藏线
+              }
+            }
           }
         ]
       }
@@ -54,7 +100,6 @@ export default {
       const { data: res } = await this.$axios.get('hot')
       // 绑定数据
       this.allData = res
-      console.log(res)
       // 动态渲染数据方法
       this.updateChart()
     },
@@ -64,9 +109,11 @@ export default {
       const seriesData = this.allData[this.currentIndex].children.map(item => {
         return {
           name: item.name,
-          value: item.value
+          value: item.value,
+          children: item.children
         }
       })
+      // legen筛选数据
       const legenData = this.allData[this.currentIndex].children.map(item => {
         return item.name
       })
@@ -87,9 +134,23 @@ export default {
       // 根据游览器宽度计算对应响应值宽度大小
       this.titleFontSize = this.$refs.hot_ref.offsetWidth / 100 * 3.6
       const adapterOption = {
+        title: {
+          textStyle: {
+            fontSize: this.titleFontSize
+          }
+        },
+        legend: {
+          itemWidth: this.titleFontSize / 2,
+          itemHeight: this.titleFontSize / 2,
+          itemGap: this.titleFontSize / 2,
+          textStyle: {
+            fontSize: this.titleFontSize / 2
+          }
+        },
         series: [
           {
-
+            radius: this.titleFontSize * 5,
+            center: ['50%', '60%']
           }
         ]
       }
@@ -122,6 +183,12 @@ export default {
       } else {
         return this.allData[this.currentIndex].name
       }
+    },
+    // 控制css样式
+    comStyle () {
+      return {
+        fontSize: this.titleFontSize + 'px'
+      }
     }
   }
 }
@@ -134,7 +201,7 @@ export default {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  background-color: cyan;
+  color: white;
 }
 .arr-right{
   position: absolute;
@@ -142,11 +209,12 @@ export default {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  background-color: cyan;
+  color: white;
 }
 .cat-name{
   position: absolute;
   left: 80%;
   bottom: 20px;
+  color: white;
 }
 </style>
