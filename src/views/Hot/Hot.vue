@@ -2,6 +2,9 @@
 <template>
   <div class='com-container'>
     <div class='com-chart' ref='hot_ref'></div>
+    <span class="iconfont arr-left" @click="toLeft">&#xe6ef;</span>
+    <span class="iconfont arr-right" @click="toRight">&#xe6ed;</span>
+    <span class="cat-name">{{ catName }}</span>
   </div>
 </template>
 
@@ -12,7 +15,9 @@ export default {
       // 图表实例数据
       chartInstance: null,
       // 请求数据
-      allData: null
+      allData: null,
+      // 当前展示的一级分类数据
+      currentIndex: 0
     }
   },
   mounted () {
@@ -56,13 +61,13 @@ export default {
     // 动态渲染数据方法
     updateChart () {
       // 处理图表需要的数据
-      const seriesData = this.allData[0].children.map(item => {
+      const seriesData = this.allData[this.currentIndex].children.map(item => {
         return {
           name: item.name,
           value: item.value
         }
       })
-      const legenData = this.allData[0].children.map(item => {
+      const legenData = this.allData[this.currentIndex].children.map(item => {
         return item.name
       })
       const dataOption = {
@@ -91,11 +96,57 @@ export default {
       this.chartInstance.setOption(adapterOption)
       // 调用Echarts实例方法(响应式)
       this.chartInstance.resize()
+    },
+    // 图表切换-左边
+    toLeft () {
+      this.currentIndex--
+      if (this.currentIndex < 0) {
+        this.currentIndex = this.allData.length - 1
+      }
+      this.updateChart()
+    },
+    // 图表切换-右边
+    toRight () {
+      this.currentIndex++
+      if (this.currentIndex > this.allData.length - 1) {
+        this.currentIndex = 0
+      }
+      this.updateChart()
+    }
+  },
+  computed: {
+    // 标题
+    catName () {
+      if (!this.allData) {
+        return ''
+      } else {
+        return this.allData[this.currentIndex].name
+      }
     }
   }
 }
 </script>
 
 <style lang='less' scoped>
-
+.arr-left{
+  position: absolute;
+  left: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  background-color: cyan;
+}
+.arr-right{
+  position: absolute;
+  right: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  background-color: cyan;
+}
+.cat-name{
+  position: absolute;
+  left: 80%;
+  bottom: 20px;
+}
 </style>
