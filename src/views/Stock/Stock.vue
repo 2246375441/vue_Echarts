@@ -28,7 +28,13 @@ export default {
         ['82%', '40%'],
         ['34%', '75%'],
         ['66%', '75%']
-      ]
+      ],
+      // 数据页数/更新
+      currentIndex: 0,
+      // 定时器
+      timerId: null,
+      // 自动切换间隔
+      timeout: 3000
     }
   },
   mounted () {
@@ -44,6 +50,8 @@ export default {
   destroyed () {
     // 销毁监听事件
     window.removeEventListener('resize', this.screenAdapter)
+    // 销毁定时器
+    clearInterval(this.timerId)
   },
   methods: {
     initChart () {
@@ -58,6 +66,14 @@ export default {
         }
       }
       this.chartInstance.setOption(initOption)
+      // 监听鼠标移入事件监听
+      this.chartInstance.on('mouseover', () => {
+        clearInterval(this.timerId)
+      })
+      // 监听鼠标移除事件
+      this.chartInstance.on('mouseout', () => {
+        this.startInterval()
+      })
     },
     // 请求数据
     async getData () {
@@ -66,15 +82,19 @@ export default {
       // 绑定数据
       this.allData = res
       this.updateChart()
+      // 启动定时器
+      this.startInterval()
     },
     // 数据处理
     updateChart () {
+      const start = this.currentIndex * 5
+      const end = (this.currentIndex + 1) * 5
       // 圆环图中心点坐标
       const centerArr = this.centerArr
       // 圆环图颜色
       const colorArr = this.colorArr
       // 处理图表需要的数据
-      const showData = this.allData.slice(0, 5)
+      const showData = this.allData.slice(start, end)
       const seriesArr = showData.map((item, index) => {
         return {
           type: 'pie',
@@ -132,6 +152,19 @@ export default {
       this.chartInstance.setOption(adapterOption)
       // 调用Echarts实例自带 resize方法(响应式/自适应)
       this.chartInstance.resize()
+    },
+    // 更新动画
+    startInterval () {
+      if (this.timerId) {
+        clearInterval(this.timerId)
+      }
+      this.timerId = setInterval(() => {
+        this.currentIndex++
+        if (this.currentIndex > 1) {
+          this.currentIndex = 0
+        }
+        this.updateChart()
+      }, this.timeout)
     }
 
   }
