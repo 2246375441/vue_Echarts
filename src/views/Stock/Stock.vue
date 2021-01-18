@@ -144,10 +144,23 @@ export default {
     // 响应式方法
     screenAdapter () {
       // 分辨率文字大小
-      // const titleFontSize = this.$refs.stock_ref.offsetWidth / 100 * 3.6
-
+      const titleFontSize = this.$refs.stock_ref.offsetWidth / 100 * 3.6
+      // 圆环的 内圆半径和外圆半径
+      const innerRadius = titleFontSize * 2
+      const outterRadius = titleFontSize * 1.125
       const adapterOption = {
-
+        title: {
+          textStyle: {
+            fontSize: titleFontSize
+          }
+        },
+        series: [
+          { type: 'pie', radius: [outterRadius, innerRadius], label: { fontSize: titleFontSize / 2 } },
+          { type: 'pie', radius: [outterRadius, innerRadius], label: { fontSize: titleFontSize / 2 } },
+          { type: 'pie', radius: [outterRadius, innerRadius], label: { fontSize: titleFontSize / 2 } },
+          { type: 'pie', radius: [outterRadius, innerRadius], label: { fontSize: titleFontSize / 2 } },
+          { type: 'pie', radius: [outterRadius, innerRadius], label: { fontSize: titleFontSize / 2 } }
+        ]
       }
       this.chartInstance.setOption(adapterOption)
       // 调用Echarts实例自带 resize方法(响应式/自适应)
