@@ -22,11 +22,19 @@ export default {
       titleFontSize: 0
     }
   },
+  created () {
+    this.$socket.registerCallBack('hotData', this.getData)
+  },
   mounted () {
     // 初始化实例
     this.initChart()
     // 请求数据函数
-    this.getData()
+    // this.getData()
+    this.$socket.send({
+      action: 'getData', // 操作类型
+      socketType: 'hotData', // 回调函数名字
+      chartName: 'hot' // 请求json的文件名
+    })
     // 监听浏览器宽度变化触发响应式回调
     window.addEventListener('resize', this.screenAdapter)
     // 手动触发响应式回调
@@ -95,11 +103,15 @@ export default {
       this.chartInstance.setOption(initOption)
     },
     // 请求参数
-    async getData () {
+    async getData (ret) {
       // 请求饼图数据
-      const { data: res } = await this.$axios.get('hot')
+      // const { data: res } = await this.$axios.get('hot')
       // 绑定数据
-      this.allData = res
+      // this.allData = res
+
+      // 使用webSocket请求数据
+      this.allData = ret
+
       // 动态渲染数据方法
       this.updateChart()
     },
@@ -113,13 +125,13 @@ export default {
           children: item.children
         }
       })
-      // legen筛选数据
-      const legenData = this.allData[this.currentIndex].children.map(item => {
+      // legend筛选数据
+      const legendData = this.allData[this.currentIndex].children.map(item => {
         return item.name
       })
       const dataOption = {
         legend: {
-          data: legenData
+          data: legendData
         },
         series: [
           {

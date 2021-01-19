@@ -31,13 +31,21 @@ export default {
 
     }
   },
+  created () {
+    this.$socket.registerCallBack('rankData', this.getData)
+  },
   mounted () {
     // 数据赋值
     this.endValue = this.valueNum - 1
     // 初始化实例
     this.initChart()
     // 请求图表数据
-    this.getData()
+    // this.getData()
+    this.$socket.send({
+      action: 'getData', // 操作类型
+      socketType: 'rankData', // 回调函数名字
+      chartName: 'rank' // 请求json的文件名
+    })
     // 监听页面宽度发生变化 触发回调
     window.addEventListener('resize', this.screenAdapter)
     // 手动触发响应式回调
@@ -114,14 +122,18 @@ export default {
       })
     },
     // 请求数据
-    async getData () {
+    async getData (ret) {
       // 请求数据 [{name: "广东", value: 230},{}....]
-      const { data: res } = await this.$axios.get('rank')
+      // const { data: res } = await this.$axios.get('rank')
+      // this.allData = res
+
+      // 使用webSocket请求数据
+      this.allData = ret
+
       // 将数据排序
-      res.sort((a, b) => {
+      this.allData.sort((a, b) => {
         return -(a.value - b.value)
       })
-      this.allData = res
       this.updateChart()
       // 启动平移动画
       this.startInterval()

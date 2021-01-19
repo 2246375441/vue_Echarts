@@ -22,11 +22,19 @@ export default {
       mapData: {}
     }
   },
+  created () {
+    this.$socket.registerCallBack('mapData', this.getData)
+  },
   mounted () {
     // 初始化实例
     this.initChart()
     // 请求数据
-    this.getData()
+    // this.getData()
+    this.$socket.send({
+      action: 'getData', // 操作类型
+      socketType: 'mapData', // 回调函数名字
+      chartName: 'map' // 请求json的文件名
+    })
     // 监听页面宽度变化
     window.addEventListener('resize', this.screenAdapter)
     this.screenAdapter()
@@ -93,7 +101,7 @@ export default {
           // 判断缓存中是否存在该地图数据,有则直接开始渲染 没有则获取发送请求
           if (!this.mapData[provinceInfo.key]) {
             // 请求json数据
-            const res = await axios.get('http://localhost:9000' + provinceInfo.path)
+            const res = await axios.get(this.websiteUrl + provinceInfo.path)
             // 缓存请求数据
             this.mapData[provinceInfo.key] = res.data
             // 注册矢量地图数据
@@ -109,10 +117,14 @@ export default {
       })
     },
     // 请求地图散点数据 (地图矢量图由本地提供而不是后端API,散点图由后端提供)
-    async getData () {
+    async getData (ret) {
       // 散点数据
-      const { data: res } = await this.$axios.get('map')
-      this.allData = res
+      // const { data: res } = await this.$axios.get('map')
+      // this.allData = res
+
+      // 使用webSocket请求数据
+      this.allData = ret
+
       this.updateChart()
     },
     // 页面渲染

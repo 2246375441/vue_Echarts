@@ -23,6 +23,9 @@ Vue.prototype.$axios = axios
 // 将Echarts对象挂载到vue全局中
 Vue.prototype.$echarts = window.echarts
 
+// 网站域名登记(重要)
+Vue.prototype.websiteUrl = 'http://localhost:9000'
+
 Vue.config.productionTip = false
 
 new Vue({

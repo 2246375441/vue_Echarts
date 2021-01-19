@@ -46,11 +46,21 @@ export default {
       ]
     }
   },
+  created () {
+    // 注册回调函数
+    this.$socket.registerCallBack('trendData', this.getData)
+  },
   mounted () {
     // 初始化图表实例
     this.initChart()
     // 请求数据
-    this.getData()
+    // this.getData()
+    // 发送数据给webSocket服务器,告诉服务器,我现在需要的数据
+    this.$socket.send({
+      action: 'getData', // 操作类型
+      socketType: 'trendData', // 回调函数名字
+      chartName: 'trend' // 请求json的文件名
+    })
     // 分辨率适配
     window.addEventListener('resize', this.screenAdapter)
     // 初始化分辨率适配
@@ -59,6 +69,8 @@ export default {
   destroyed () {
     // 取消监听屏幕大小更新事件
     window.removeEventListener('resize', this.screenAdapter)
+    // 销毁this.$socket注册的回调函数
+    this.$socket.unRegisterCallBack('trendData')
   },
   methods: {
     // 初始化图表
@@ -93,12 +105,16 @@ export default {
       // 渲染图表
       this.chartInstance.setOption(initOption)
     },
-    // 请求数据
-    async getData () {
-      // 发送请求 通过数据结构 获取内部data数据变量
-      const { data: res } = await this.$axios.get('trend')
-      // 将数据存储到data中
-      this.allData = res
+    // 请求数据(ret是webSocket服务器返回的数据)
+    async getData (ret) {
+      // // 发送请求 通过数据结构 获取内部data数据变量
+      // const { data: res } = await this.$axios.get('trend')
+      // // 将数据存储到data中
+      // this.allData = res
+      // this.updateChart()
+
+      // 使用webSocket请求数据
+      this.allData = ret
       this.updateChart()
     },
     // 图表更新

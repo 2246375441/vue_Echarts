@@ -26,11 +26,19 @@ export default {
       pageItem: 5
     }
   },
+  created () {
+    this.$socket.registerCallBack('sellerData', this.getData)
+  },
   mounted () {
     // 初始化Echarts实例对象
     this.initChart()
     // 获取服务器数据
-    this.getData()
+    // this.getData()
+    this.$socket.send({
+      action: 'getData', // 操作类型
+      socketType: 'sellerData', // 回调函数名字
+      chartName: 'seller' // 请求json的文件名
+    })
     // 监听窗口变化触发
     window.addEventListener('resize', this.screenAdapter)
     // 页面加载完成 主动进行屏幕的适配
@@ -128,10 +136,14 @@ export default {
       })
     },
     //  获取服务器数据
-    async getData () {
+    async getData (ret) {
       // 请求路径 http://127.0.0.1:8888/api/seller
-      const { data: res } = await this.$axios.get('seller')
-      this.allData = res
+      // const { data: res } = await this.$axios.get('seller')
+      // this.allData = res
+
+      // 使用webSocket请求数据
+      this.allData = ret
+
       // 对数据数据进行排序
       this.allData.sort((a, b) => {
         return a.value - b.value

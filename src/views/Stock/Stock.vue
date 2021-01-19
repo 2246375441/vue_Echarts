@@ -37,11 +37,19 @@ export default {
       timeout: 3000
     }
   },
+  created () {
+    this.$socket.registerCallBack('stockData', this.getData)
+  },
   mounted () {
     // 初始化实例数据
     this.initChart()
     // 请求数据
-    this.getData()
+    // this.getData()
+    this.$socket.send({
+      action: 'getData', // 操作类型
+      socketType: 'stockData', // 回调函数名字
+      chartName: 'stock' // 请求json的文件名
+    })
     // 监听页面宽度变化
     window.addEventListener('resize', this.screenAdapter)
     // 调用响应式方法
@@ -76,11 +84,17 @@ export default {
       })
     },
     // 请求数据
-    async getData () {
-      // 请求数据
-      const { data: res } = await this.$axios.get('stock')
-      // 绑定数据
-      this.allData = res
+    async getData (ret) {
+      // // 请求数据
+      // const { data: res } = await this.$axios.get('stock')
+      // // 绑定数据
+      // this.allData = res
+      // this.updateChart()
+      // // 启动定时器
+      // this.startInterval()
+
+      // 使用webSocket请求数据
+      this.allData = ret
       this.updateChart()
       // 启动定时器
       this.startInterval()
