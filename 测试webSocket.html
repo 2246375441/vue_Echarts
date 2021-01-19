@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <button class="btn1">连接服务端</button>
+    <button class="btn2">发送数据</button><br>
+    <h1>从服务端接受的数据如下</h1><br>
+    <span class="span"></span>
+
+    <script >
+        let btn1 = document.querySelector('.btn1'),
+          btn2 = document.querySelector('.btn2'),
+          span = document.querySelector('span');
+        // 连接websocket服务端
+        let ws = null
+        btn1.onclick = () => {
+					ws = new WebSocket('ws://127.0.0.1:9001')
+          ws.onopen = () => {
+            console.log('连接服务端成功了.......')
+          }
+          ws.onclose = () => {
+            console.log('连接服务端失败了.......')
+          }
+          ws.onmessage = (msg) => {
+            console.log('接收到从服务端发送过来的数据了........')
+            console.log(msg)
+            span.innerText = msg.data
+          }
+        }
+
+        // 发送数据
+        btn2.onclick = () => {
+            ws.send(JSON.stringify({
+              // 请求数据
+              action: 'getData',
+              socketType: 'trendData',
+              chartName: 'trend',
+              value:''
+
+              // 全屏事件
+              // action: 'fullScreen',
+              // socketType: 'fullScreen',
+              // chartName: 'trend',
+              // value:true
+            }))
+        }
+    </script>
+</body>
+</html>
