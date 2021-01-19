@@ -112,7 +112,7 @@ export default {
       const seriesArr = showData.map((item, index) => {
         return {
           type: 'pie',
-          radius: [110, 100],
+          // radius: [30, 50],
           center: centerArr[index],
           label: {
             position: 'center',

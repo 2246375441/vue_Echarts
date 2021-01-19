@@ -56,7 +56,7 @@ export default {
           left: 20
         },
         legend: {
-          top: '15%',
+          top: '12%',
           icon: 'circle'
         },
         tooltip: {
@@ -152,8 +152,8 @@ export default {
           }
         },
         legend: {
-          itemWidth: this.titleFontSize / 2,
-          itemHeight: this.titleFontSize / 2,
+          itemWidth: this.titleFontSize,
+          itemHeight: this.titleFontSize,
           itemGap: this.titleFontSize / 2,
           textStyle: {
             fontSize: this.titleFontSize / 2

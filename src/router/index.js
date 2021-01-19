@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Home from '../views/Home/Home'
 import SellerPage from '../views/Seller/SellerPage'
 import TrendPage from '../views/Trend/TrendPage'
 import MapPage from '../views/Map/MapPage'
@@ -10,6 +11,15 @@ import StockPage from '../views/Stock/StockPage'
 Vue.use(VueRouter)
 
 const routes = [
+  {
+    path: '/',
+    component: Home
+  },
+  {
+    name: 'Home',
+    path: '/Home',
+    component: Home
+  },
   {
     // 柱状图
     name: 'SellerPage',
