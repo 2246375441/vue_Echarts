@@ -7,6 +7,14 @@ import axios from 'axios'
 import './assets/css/global.less'
 // 引入字体样式
 import './assets/font/iconfont.css'
+
+// 导入webSocket封装方法
+import SocketService from './utils/socket_service'
+// 将webSocket挂载到vue原型对象上  this.$socket 调用内部方法
+Vue.prototype.$socket = SocketService.Instance
+// 对服务端进行webSocket连接
+Vue.prototype.$socket.connect()
+
 // 配置axios请求url路径
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/'
 // 将axios对象挂载到vue全局中
