@@ -69,7 +69,7 @@ export default class SocketService {
           // 调用回调函数(传入服务器返回的图表数据)
           this.callBackMapping[socketType].call(this, realData)
         } else if (action === 'fullScreen') {
-
+          this.callBackMapping[socketType].call(this, recvData)
         } else if (action === 'themeChange') {
 
         }

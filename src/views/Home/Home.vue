@@ -90,11 +90,40 @@ export default {
       }
     }
   },
+  created () {
+    this.$socket.registerCallBack('fullScreen', this.recvData)
+  },
+  destroyed () {
+    this.$socket.unRegisterCallBack('fullScreen')
+  },
   methods: {
+    // 图表全屏按钮
     changeSize (chartName) {
-      // 1 改变fullScreenStatus容器中对应变量
-      this.fullScreenStatus[chartName] = !this.fullScreenStatus[chartName]
-      // 2 调用图表内部的screenAdapter方法完成自适应
+      // ☆ 点击图表缩放按钮 启动全屏
+      // // 1 改变fullScreenStatus容器中对应变量
+      // this.fullScreenStatus[chartName] = !this.fullScreenStatus[chartName]
+      // // 2 调用图表内部的screenAdapter方法完成自适应
+      // this.$nextTick(() => {
+      //   this.$refs[chartName].$children[0].screenAdapter()
+      // })
+
+      // ☆ 多客户端联动
+      const targerValue = !this.fullScreenStatus[chartName]
+      // 将数据发送给webSocket服务端 服务器将数据转发给每一个连接的浏览器
+      this.$socket.send({
+        action: 'fullScreen',
+        socketType: 'fullScreen',
+        chartName: chartName,
+        value: targerValue
+      })
+    },
+    // 接收到全屏数据之后的处理
+    recvData (data) {
+      // 取出哪个图表需要进行切换
+      const chartName = data.chartName
+      // 取出,切换成什么状态
+      const targetValue = data.value
+      this.fullScreenStatus[chartName] = targetValue
       this.$nextTick(() => {
         this.$refs[chartName].$children[0].screenAdapter()
       })
