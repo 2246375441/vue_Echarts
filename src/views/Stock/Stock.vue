@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   data () {
     return {
@@ -64,7 +65,7 @@ export default {
   methods: {
     initChart () {
       // 初始化Echarts实例对象
-      this.chartInstance = this.$echarts.init(this.$refs.stock_ref, 'chalk')
+      this.chartInstance = this.$echarts.init(this.$refs.stock_ref, this.theme)
       // 初始化配置项
       const initOption = {
         title: {
@@ -194,6 +195,19 @@ export default {
       }, this.timeout)
     }
 
+  },
+  computed: {
+    ...mapState(['theme'])
+  },
+  watch: {
+    theme () {
+      // console.log('主题切换')
+      // 销毁当前 图表
+      this.chartInstance.dispose()
+      this.initChart() // 重新初始化
+      this.screenAdapter() // 完成屏幕适配
+      this.updateChart() // 更新图表数据展示
+    }
   }
 }
 </script>

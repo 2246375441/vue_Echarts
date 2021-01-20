@@ -9,6 +9,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+import { getThemeValue } from '../../utils/theme_utils'
 export default {
   data () {
     return {
@@ -48,7 +50,7 @@ export default {
     // 初始化实例
     initChart () {
       // 初始化Echarts实例对象
-      this.chartInstance = this.$echarts.init(this.$refs.hot_ref, 'chalk')
+      this.chartInstance = this.$echarts.init(this.$refs.hot_ref, this.theme)
       const initOption = {
         title: {
           text: '▎热销商品销售金额占比图',
@@ -199,8 +201,20 @@ export default {
     // 控制css样式
     comStyle () {
       return {
-        fontSize: this.titleFontSize + 'px'
+        fontSize: this.titleFontSize + 'px',
+        color: getThemeValue(this.theme).titleColor
       }
+    },
+    ...mapState(['theme'])
+  },
+  watch: {
+    theme () {
+      // console.log('主题切换')
+      // 销毁当前 图表
+      this.chartInstance.dispose()
+      this.initChart() // 重新初始化
+      this.screenAdapter() // 完成屏幕适配
+      this.updateChart() // 更新图表数据展示
     }
   }
 }

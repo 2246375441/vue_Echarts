@@ -1,16 +1,16 @@
 <template>
-  <div class="screen-container">
+  <div class="screen-container" :style="containerStyle">
     <header class="screen-header">
       <div>
-        <img src="/static/img/header_border_dark.png" alt="">
+        <img :src="headerSrc" alt="">
       </div>
       <span class="logo">
         <!--logo-->
-        <img src="/static/img/logo_dark.png" alt="">
+        <img :src="logoSrc" alt="">
       </span>
       <span class="title">Echarts监控系统</span>
       <div class="title-right">
-        <img src="/static/img/qiehuan_dark.png" class="qiehuan"  alt="">
+        <img :src="themeSrc" class="qiehuan"  alt="" @click="handleChangeTheme">
         <span class="datetime">
           <!--时间-->
         </span>
@@ -76,6 +76,8 @@ import Rank from '../Rank/RankPage'
 import Seller from '../Seller/SellerPage'
 import Stock from '../Stock/StockPage'
 import Trend from '../Trend/TrendPage'
+import { mapState } from 'vuex'
+import { getThemeValue } from '../../utils/theme_utils'
 export default {
   data () {
     return {
@@ -127,6 +129,10 @@ export default {
       this.$nextTick(() => {
         this.$refs[chartName].$children[0].screenAdapter()
       })
+    },
+    // 修改主题(修改vuex中state数据)
+    handleChangeTheme () {
+      this.$store.commit('changTheme')
     }
   },
   components: {
@@ -136,6 +142,26 @@ export default {
     Seller,
     Stock,
     Trend
+  },
+  computed: {
+    ...mapState(['theme']),
+    logoSrc () {
+      return '/static/img/' + getThemeValue(this.theme).logoSrc
+    },
+    headerSrc () {
+      return '/static/img/' + getThemeValue(this.theme).headerSrc
+    },
+    themeSrc () {
+      return '/static/img/' + getThemeValue(this.theme).themeSrc
+    },
+    containerStyle () {
+      return {
+        backgroundColor: getThemeValue(this.theme).backgroundColor,
+        color: getThemeValue(this.theme).titleColor
+
+      }
+    }
+
   }
 }
 </script>

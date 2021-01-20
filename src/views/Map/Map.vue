@@ -9,7 +9,7 @@
 import axios from 'axios'
 // 导入工具函数 传入中文参数 返回对应json数据路径
 import { getProvinceMapInfo } from '../../utils/map_utils'
-
+import { mapState } from 'vuex'
 export default {
   name: 'Map',
   data () {
@@ -46,7 +46,7 @@ export default {
   methods: {
     // 初始化实例
     async initChart () {
-      this.chartInstance = this.$echarts.init(this.$refs.map_ref, 'chalk')
+      this.chartInstance = this.$echarts.init(this.$refs.map_ref, this.theme)
       // 请求获取中国地图的矢量数据
       // 地图数据存放在根目录/static/map/
       const res = await axios.get('http://localhost:9000/static/map/china.json')
@@ -188,6 +188,19 @@ export default {
         }
       }
       this.chartInstance.setOption(revertOption)
+    }
+  },
+  computed: {
+    ...mapState(['theme'])
+  },
+  watch: {
+    theme () {
+      // console.log('主题切换')
+      // 销毁当前 图表
+      this.chartInstance.dispose()
+      this.initChart() // 重新初始化
+      this.screenAdapter() // 完成屏幕适配
+      this.updateChart() // 更新图表数据展示
     }
   }
 }
