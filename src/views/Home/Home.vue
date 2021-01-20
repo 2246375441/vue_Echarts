@@ -5,8 +5,7 @@
         <img :src="headerSrc" alt="">
       </div>
       <span class="logo">
-        <!--logo-->
-        <img :src="logoSrc" alt="">
+        <!-- <img :src="logoSrc" alt="">-->
       </span>
       <span class="title">Echarts监控系统</span>
       <div class="title-right">
@@ -94,9 +93,11 @@ export default {
   },
   created () {
     this.$socket.registerCallBack('fullScreen', this.recvData)
+    this.$socket.registerCallBack('themeChange', this.recvThemeChange)
   },
   destroyed () {
     this.$socket.unRegisterCallBack('fullScreen')
+    this.$socket.unRegisterCallBack('themeChange')
   },
   methods: {
     // 图表全屏按钮
@@ -132,6 +133,15 @@ export default {
     },
     // 修改主题(修改vuex中state数据)
     handleChangeTheme () {
+      // this.$store.commit('changTheme')
+      this.$socket.send({
+        action: 'themeChange',
+        socketType: 'themeChange',
+        chartName: '',
+        value: ''
+      })
+    },
+    recvThemeChange () {
       this.$store.commit('changTheme')
     }
   },
@@ -146,13 +156,15 @@ export default {
   computed: {
     ...mapState(['theme']),
     logoSrc () {
-      return '/static/img/' + getThemeValue(this.theme).logoSrc
+      // 原项目
+      // return '/static/img/' + getThemeValue(this.theme).logoSrc
+      return 'static/img/' + getThemeValue(this.theme).logoSrc
     },
     headerSrc () {
-      return '/static/img/' + getThemeValue(this.theme).headerSrc
+      return 'static/img/' + getThemeValue(this.theme).headerBorderSrc
     },
     themeSrc () {
-      return '/static/img/' + getThemeValue(this.theme).themeSrc
+      return 'static/img/' + getThemeValue(this.theme).themeSrc
     },
     containerStyle () {
       return {

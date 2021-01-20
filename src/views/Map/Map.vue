@@ -49,7 +49,9 @@ export default {
       this.chartInstance = this.$echarts.init(this.$refs.map_ref, this.theme)
       // 请求获取中国地图的矢量数据
       // 地图数据存放在根目录/static/map/
-      const res = await axios.get('http://localhost:9000/static/map/china.json')
+      const url = this.websiteUrl
+      console.log(url)
+      const res = await axios.get(url + 'static/map/china.json')
       // 注册地图数据
       this.$echarts.registerMap('china', res.data)
       const initOption = {

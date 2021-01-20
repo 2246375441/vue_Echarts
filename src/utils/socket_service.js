@@ -37,7 +37,10 @@ export default class SocketService {
     if (!window.WebSocket) {
       return console.log('您的游览器不支持webSocket')
     }
-    this.ws = new WebSocket('ws://127.0.0.1:9001')
+    // 开发使用
+    // this.ws = new WebSocket('ws://127.0.0.1:9001')
+    // 上线使用
+    this.ws = new WebSocket('ws://chenxinlong.xyz:60102/')
 
     // 连接成功的事件
     this.ws.onopen = () => {
@@ -71,7 +74,7 @@ export default class SocketService {
         } else if (action === 'fullScreen') {
           this.callBackMapping[socketType].call(this, recvData)
         } else if (action === 'themeChange') {
-
+          this.callBackMapping[socketType].call(this, recvData)
         }
       }
     }
